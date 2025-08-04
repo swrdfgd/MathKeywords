@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Random Math Keywords Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <script src="daftarKata.js"></script>
+  <script src="daftarKategori.js"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f0f2f5;
+      padding: 2rem;
+      margin: 0;
+      color: #212529;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: #0d6efd;
+    }
+
+    button {
+      background-color: #198754;
+      color: white;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+
+    button:hover {
+      background-color: #146c43;
+    }
+
+    .keyword-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-top: 2rem;
+    }
+
+    .keyword a {
+      display: block;
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      text-transform: lowercase;
+      text-decoration: none;
+      color: #212529;
+      transition: background 0.2s ease;
+    }
+
+    .keyword a:hover {
+      background: #e2f3ea;
+    }
+
+    .loading {
+      text-align: center;
+      font-style: italic;
+      color: #888;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Random Math Keywords Generator</h1>
+    <button onclick="tampilkanKeywords()">🔁 Generate Keywords</button>
+  </header>
+
+  <div id="loadingMessage" class="loading" style="display: none;">Loading keywords...</div>
+  <div id="keywordContainer" class="keyword-list"></div>
+
+  <script>
+    async function tambahKataDariWikipedia(jumlahKategori = 3, jumlahArtikel = 10) {
+      const kategoriTerpilih = [];
+      while (kategoriTerpilih.length < jumlahKategori) {
+        const acak = daftarKategori[Math.floor(Math.random() * daftarKategori.length)][0];
+        if (!kategoriTerpilih.includes(acak)) kategoriTerpilih.push(acak);
+      }
+
+      for (const kategori of kategoriTerpilih) {
+        try {
+          const url = `https://en.wikipedia.org/w/api.php?action=query&list=categorymembers&cmtitle=Category:${encodeURIComponent(kategori)}&cmlimit=${jumlahArtikel}&format=json&origin=*`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const judulArtikel = data.query.categorymembers.map(item => item.title);
+          judulArtikel.forEach(judul => {
+            if (!daftarKata.includes(judul)) {
+              daftarKata.push(judul);
+            }
+          });
+        } catch (e) {
+          console.warn('Gagal mengambil kategori:', kategori, e);
+        }
+      }
+    }
+
+    function generateKeyword() {
+      let keyword = '';
+      while (Math.random() < 1/2 || keyword.length < 1) {
+        let pilihanKeyword = daftarKata[Math.floor(Math.random() * daftarKata.length)];
+        if (Math.random() < 1/2) {
+          let bagian = pilihanKeyword.split(/[-–—\/,:.;()\[\]\s]+/);
+          for (let i = 0; i < bagian.length; i++) {
+            if (Math.random() < 1/2) keyword += bagian[i].toLowerCase() + ' ';
+          }
+        } else {
+          keyword += pilihanKeyword.toLowerCase() + ' ';
+        }
+      }
+      return keyword.trim();
+    }
+
+    async function tampilkanKeywords(jumlah = 12) {
+      const loading = document.getElementById("loadingMessage");
+      const container = document.getElementById("keywordContainer");
+      loading.style.display = "block";
+      container.innerHTML = "";
+
+      await tambahKataDariWikipedia(); // ambil data Wikipedia
+
+      for (let i = 0; i < jumlah; i++) {
+        const kata = generateKeyword();
+        const div = document.createElement("div");
+        div.className = "keyword";
+        const a = document.createElement("a");
+        a.href = `https://www.google.com/search?q=${encodeURIComponent(kata)}`;
+        a.target = "_blank";
+        a.textContent = kata;
+        div.appendChild(a);
+        container.appendChild(div);
+      }
+
+      loading.style.display = "none";
+    }
+
+    // Generate pertama kali saat halaman dibuka
+    tampilkanKeywords();
+  </script>
+</body>
+</html>
