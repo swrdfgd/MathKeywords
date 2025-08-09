@@ -111,19 +111,20 @@
       let keyword = '';
       while (Math.random() < 1/2 || keyword.length < 1) {
         let pilihanKeyword = daftarKata[Math.floor(Math.random() * daftarKata.length)];
-        if (Math.random() < 1/2) {
+        //if (Math.random() < 1/2) {
           let bagian = pilihanKeyword.split(/[-–—\/,:.;()\[\]\s]+/);
           for (let i = 0; i < bagian.length; i++) {
             if (Math.random() < 1/2) keyword += bagian[i].toLowerCase() + ' ';
-          }
-        } else {
+		  }
+        /*} else {
           keyword += pilihanKeyword.toLowerCase() + ' ';
         }
+		*/
       }
       return keyword.trim();
     }
 
-	weblinks = ['https://www.google.com/search?q=','https://www.coursera.org/search?query=']
+	weblinks = ['https://www.google.com/search?q=']
     async function tampilkanKeywords(jumlah = 12) {
       const loading = document.getElementById("loadingMessage");
       const container = document.getElementById("keywordContainer");
