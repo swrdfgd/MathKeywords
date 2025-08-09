@@ -123,6 +123,7 @@
       return keyword.trim();
     }
 
+	weblinks = ['https://www.google.com/search?q=','https://www.coursera.org/search?query=']
     async function tampilkanKeywords(jumlah = 12) {
       const loading = document.getElementById("loadingMessage");
       const container = document.getElementById("keywordContainer");
@@ -136,7 +137,7 @@
         const div = document.createElement("div");
         div.className = "keyword";
         const a = document.createElement("a");
-        a.href = `https://www.google.com/search?q=${encodeURIComponent(kata)}`;
+        a.href = `${weblinks[Math.floor(Math.random()*weblinks.length)]}${encodeURIComponent(kata)}`;
         a.target = "_blank";
         a.textContent = kata;
         div.appendChild(a);
