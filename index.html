@@ -83,6 +83,9 @@
   <div id="keywordContainer" class="keyword-list"></div>
 
   <script>
+	daftarKataWiki = [];
+	daftarKataEOM = [];
+	
     async function tambahKataDariWikipedia(jumlahKategori = 3, jumlahArtikel = 10) {
       const kategoriTerpilih = [];
       while (kategoriTerpilih.length < jumlahKategori) {
@@ -99,6 +102,7 @@
           judulArtikel.forEach(judul => {
             if (!daftarKata.includes(judul)) {
               daftarKata.push(judul);
+			  daftarKataWiki.push(judul);
             }
           });
         } catch (e) {
@@ -108,17 +112,26 @@
     }
 	
 	async function ambilRandomEoM(jumlah = 10) {
+	  try{
       const url = `https://encyclopediaofmath.org/api.php?action=query&list=random&rnlimit=${encodeURIComponent(jumlah)}&rnnamespace=0&format=json&origin=*`;
       const res = await fetch(url);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
-      (data.query?.random || []).forEach(judul => {daftarKata.push(judul.title);})
+      (data.query?.random || []).forEach(judul => {daftarKata.push(judul.title); daftarKataEOM.push(judul.title)})
+	  } catch (e) {
+          console.warn('Gagal mengambil EOM', e);
+      }
     }
 
     function generateKeyword() {
       let keyword = '';
-      while (Math.random() < 1/2 || keyword.length < 1) {
+      while (Math.random() < 0.5 || keyword.length < 1) {
         let pilihanKeyword = daftarKata[Math.floor(Math.random() * daftarKata.length)];
+		if (Math.random() < 0.5 && daftarKataWiki.length > 0){
+			pilihanKeyword = daftarKataWiki[Math.floor(Math.random() * daftarKataWiki.length)];
+		} else if (Math.random() < 0.5 && daftarKataEOM.length > 0){
+			pilihanKeyword = daftarKataEOM[Math.floor(Math.random() * daftarKataEOM.length)];
+		}
         //if (Math.random() < 1/2) {
           let bagian = pilihanKeyword.split(/[-–—\/,:.;()\[\]\s]+/);
           for (let i = 0; i < bagian.length; i++) {
@@ -140,7 +153,7 @@
       container.innerHTML = "";
 
       await tambahKataDariWikipedia(); // ambil data Wikipedia
-	  //await ambilRandomEoM();
+	  await ambilRandomEoM();
 
       for (let i = 0; i < jumlah; i++) {
         const kata = generateKeyword();
